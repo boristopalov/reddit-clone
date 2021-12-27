@@ -2,6 +2,7 @@ import { Options } from "@mikro-orm/core";
 import path from "path";
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
+require('dotenv').config();
 
 
 const config: Options = {
@@ -19,8 +20,8 @@ const config: Options = {
   },
   entities: [Post],
   dbName: "reddit",
-  user: "boris",
-  password: "brusselsproutstuna",
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
   type: "postgresql",
   debug: !__prod__,
 };
