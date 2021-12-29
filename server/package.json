@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/node": "^17.0.5",
     "nodemon": "^2.0.15",
     "rimraf": "^3.0.2",
@@ -24,8 +25,12 @@
     "@mikro-orm/core": "^4.5.10",
     "@mikro-orm/migrations": "^4.5.10",
     "@mikro-orm/postgresql": "^4.5.10",
+    "apollo-server-express": "^3.5.0",
     "dotenv": "^10.0.0",
-    "pg": "^8.7.1"
+    "express": "^4.17.2",
+    "graphql": "^16.2.0",
+    "pg": "^8.7.1",
+    "type-graphql": "^1.1.1"
   },
   "mikro-orm": {
     "useTsNode": true,
