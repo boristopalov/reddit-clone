@@ -7,7 +7,8 @@
     "start": "node dist/index.js",
     "watch": "rimraf ./dist && tsc -w",
     "dev": "nodemon dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create:migration": "mikro-orm migration:create"
   },
   "keywords": [],
   "author": "",
@@ -26,10 +27,13 @@
     "@mikro-orm/migrations": "^4.5.10",
     "@mikro-orm/postgresql": "^4.5.10",
     "apollo-server-express": "^3.5.0",
+    "connect-redis": "^6.0.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
+    "express-session": "^1.17.2",
     "graphql": "15.7.2",
     "pg": "^8.7.1",
+    "redis": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^1.1.1"
   },
