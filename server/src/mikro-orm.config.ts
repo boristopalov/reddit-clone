@@ -23,8 +23,7 @@ const config: Options = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   type: "postgresql",
-  // debug: !__prod__,
-  debug: true,
+  debug: !__prod__,
 };
 
 export default config;

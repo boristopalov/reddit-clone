@@ -8,6 +8,16 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+const Redis = require("ioredis");
+const session = require("express-session");
+import { MyContext } from "./types";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import cors from "cors";
+
+const RedisStore = require('connect-redis')(session)
+const redisClient = new Redis();
+// const REDIS_SECRET = process.env.REDIS_SECRET;
+// console.log(REDIS_SECRET)
 
 const main = async () => {
   // connect to database
@@ -16,18 +26,43 @@ const main = async () => {
   // run migrations
   await orm.getMigrator().up();
 
-  // creates an instance of post, doesn't add it to the database yet
-  // const post = orm.em.create(Post, {title: 'My first post'});
-  // adds post to the database
-  // await orm.em.persistAndFlush(post);
-
   const app = express();
+  app.use(
+    session({
+      name: "qid",
+      store: new RedisStore({
+        client: redisClient,
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+        httpOnly: true,
+        sameSite: "lax", // csrf
+        secure: __prod__, // cookie only works with https (we use http in dev)
+      },
+      saveUninitialized: false,
+      secret: 'asdfiajsgei',
+      resave: false,
+    })
+  );
+
+  app.use(
+    cors({
+      credentials: true,
+      // origin: [
+      //   "https://studio.apollographql.com",
+      //   "http://localhost:8080/graphql",
+      // ],
+    })
+  );
+
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em }),
+    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
   });
 
   await apolloServer.start();
@@ -38,7 +73,6 @@ const main = async () => {
     console.log("listening on port 8080");
   });
 
-  // console.log(await orm.em.find(Post, {}))
 };
 
 main();

@@ -12,7 +12,6 @@ import {
 } from "type-graphql";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-
 // promisify scrypt so we can use await syntax instead of callback
 const scryptAsync = promisify(scrypt);
 
@@ -46,13 +45,22 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { em, req }: MyContext) {
+    // not logged in
+    if (!req.session.userId) {
+      return null;
+    }
+    // if the user has a cookie they are logged in
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async registerUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em ,req }: MyContext
   ): Promise<UserResponse> {
-
-
     if (input.username.length <= 3) {
       return {
         errors: [
@@ -80,30 +88,32 @@ export class UserResolver {
       username: input.username,
       password: hashedPassword,
     });
-    try { 
-
+    try {
       await em.persistAndFlush(user);
-    }
-    catch (err)  {
-      if (err.code === '2305') { 
+    } catch (err) {
+      if (err.code === "2305") {
         // trying to register an existing username
-        return { 
+        return {
           errors: [
-            { 
+            {
               field: "username",
-              message: "username is already taken"
-            }
-          ]
-        }
+              message: "username is already taken",
+            },
+          ],
+        };
       }
     }
+
+    // when someone registers, the server sets a cookie which will log them in automatically
+    req.session.userId = user.id;
+
     return { user };
   }
 
   @Mutation(() => UserResponse)
   async loginUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: input.username });
     if (!user) {
@@ -118,7 +128,11 @@ export class UserResolver {
     }
     const [salt, hashedPassword] = user.password.split(".");
     const keyBuffer = Buffer.from(hashedPassword, "hex");
-    const derivedBuffer = (await scryptAsync(input.password, salt, 64)) as Buffer;
+    const derivedBuffer = (await scryptAsync(
+      input.password,
+      salt,
+      64
+    )) as Buffer;
     // compare the new supplied password with the stored hashed password
     if (!timingSafeEqual(keyBuffer, derivedBuffer)) {
       return {
@@ -130,6 +144,7 @@ export class UserResolver {
         ],
       };
     }
+    req.session.userId = user.id;
     return {
       user,
     };
