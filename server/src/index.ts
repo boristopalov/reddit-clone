@@ -14,7 +14,7 @@ import { MyContext } from "./types";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import cors from "cors";
 
-const RedisStore = require('connect-redis')(session)
+const RedisStore = require("connect-redis")(session);
 const redisClient = new Redis();
 // const REDIS_SECRET = process.env.REDIS_SECRET;
 // console.log(REDIS_SECRET)
@@ -41,7 +41,7 @@ const main = async () => {
         secure: __prod__, // cookie only works with https (we use http in dev)
       },
       saveUninitialized: false,
-      secret: 'asdfiajsgei',
+      secret: "asdfiajsgei",
       resave: false,
     })
   );
@@ -49,10 +49,7 @@ const main = async () => {
   app.use(
     cors({
       credentials: true,
-      // origin: [
-      //   "https://studio.apollographql.com",
-      //   "http://localhost:8080/graphql",
-      // ],
+      origin: "http://localhost:3000",
     })
   );
 
@@ -62,17 +59,16 @@ const main = async () => {
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
   });
 
   await apolloServer.start();
   // creates a graphql endpoint
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(8080, () => {
     console.log("listening on port 8080");
   });
-
 };
 
 main();
