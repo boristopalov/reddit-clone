@@ -9,6 +9,7 @@ import {
   OrderedList,
   Spinner,
 } from "@chakra-ui/react";
+import Nav from "../components/Nav";
 
 const postsQuery = gql`
   query {
@@ -37,11 +38,14 @@ const Index = () => {
       </Alert>
     );
   return (
-    <OrderedList>
-      {data?.posts.map((post) => (
-        <ListItem> Title: {post.title} </ListItem>
-      ))}
-    </OrderedList>
+    <div>
+      <Nav />
+      <OrderedList>
+        {data?.posts.map((post: any) => (
+          <ListItem key={post.id}> Title: {post.title} </ListItem>
+        ))}
+      </OrderedList>
+    </div>
   );
 };
 

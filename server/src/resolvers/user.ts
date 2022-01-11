@@ -59,7 +59,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async registerUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
-    @Ctx() { em ,req }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     if (input.username.length <= 3) {
       return {
@@ -91,7 +91,8 @@ export class UserResolver {
     try {
       await em.persistAndFlush(user);
     } catch (err) {
-      if (err.code === "2305") {
+      console.error(err);
+      if (err.code === "23505") {
         // trying to register an existing username
         return {
           errors: [

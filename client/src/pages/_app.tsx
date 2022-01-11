@@ -4,7 +4,7 @@ import client from "../apollo-client";
 
 import theme from "../theme";
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: any) {
   return (
     <ApolloProvider client={client}>
       <ChakraProvider resetCSS theme={theme}>
