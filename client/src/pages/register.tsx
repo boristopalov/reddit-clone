@@ -3,7 +3,7 @@ import { Form, Formik } from "formik";
 import { Box, Button } from "@chakra-ui/react";
 import Wrapper from "../components/Wrapper";
 import InputField from "../components/InputField";
-import { useRegisterMutation } from "../generated/graphql";
+import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 
@@ -19,6 +19,19 @@ const Register: React.FC<Props> = () => {
         onSubmit={async (values, { setErrors }) => {
           const res = await registerUser({
             variables: { username: values.username, password: values.password },
+            update: (cache, { data }) => {
+              const registeredUser = data?.registerUser.user;
+              // don't directly mutate userData
+              // reads the user data from the cache
+              // not used in this case though since we are only reading
+              // const userData = cache.readQuery<MeQuery>({ query: MeDocument });
+
+              // writes back to the cache
+              cache.writeQuery<MeQuery>({
+                query: MeDocument,
+                data: { me: registeredUser },
+              });
+            },
           });
           if (res.data?.registerUser.errors) {
             setErrors(toErrorMap(res.data.registerUser.errors));
