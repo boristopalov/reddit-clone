@@ -12,12 +12,13 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import NextLink from "next/link";
-import { useMeQuery } from "../generated/graphql";
+import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 
 interface Props {}
 
 const Nav: React.FC<Props> = () => {
   const { data, loading, error } = useMeQuery();
+  const [logout, { loading: logoutLoading }] = useLogoutMutation();
   let body = null;
 
   if (loading) return <Spinner />;
@@ -46,10 +47,23 @@ const Nav: React.FC<Props> = () => {
       </>
     );
   } else {
+    console.log(data.me.id);
     body = (
       <>
         {data.me.username}
-        <Button variant="link" ml={2}>
+        <Button
+          variant="link"
+          ml={2}
+          onClick={() => {
+            logout({
+              update: (cache, {}) => {
+                cache.evict({ id: `User:${data.me?.id}` });
+                cache.gc();
+              },
+            });
+          }}
+          isLoading={logoutLoading}
+        >
           Logout
         </Button>
       </>
