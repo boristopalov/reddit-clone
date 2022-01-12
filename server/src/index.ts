@@ -14,6 +14,7 @@ import { MyContext } from "./types";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import cors from "cors";
 import { COOKIE_NAME } from "./constants";
+import { sendEmail } from "./utils/sendEmail";
 
 const RedisStore = require("connect-redis")(session);
 const redisClient = new Redis();
@@ -23,9 +24,12 @@ const redisClient = new Redis();
 const main = async () => {
   // connect to database
   const orm = await MikroORM.init(config);
+  // orm.em.nativeDelete(User, {});
+  sendEmail("boristopalov1@gmail.com", "hello!");
 
   // run migrations
-  await orm.getMigrator().up();
+  // giving me issues
+  // await orm.getMigrator().up();
 
   const app = express();
   app.use(

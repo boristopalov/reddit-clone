@@ -9,11 +9,11 @@ export class User {
   id!: number;
 
   @Field()
-  @Property({type: "text", unique: true})
+  @Property({ type: "text", unique: true })
   username!: string;
 
   // no field property so we can't see it within graphQL
-  @Property({type: "text", unique: true})
+  @Property({ type: "text", unique: true })
   password!: string;
 
   @Field()
@@ -24,4 +24,7 @@ export class User {
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
+  @Field()
+  @Property({ type: "text", unique: true })
+  email!: string;
 }

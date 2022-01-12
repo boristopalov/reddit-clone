@@ -4,7 +4,6 @@ import {
   Resolver,
   Ctx,
   Arg,
-  InputType,
   Field,
   Mutation,
   Query,
@@ -16,15 +15,8 @@ import { promisify } from "util";
 const scryptAsync = promisify(scrypt);
 
 import { COOKIE_NAME } from "../constants";
-
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
+import UsernamePasswordInput from "./UsernamePasswordInput";
+import { validateRegister } from "../utils/validateRegister";
 
 // if username or password is wrong
 @ObjectType()
@@ -37,7 +29,7 @@ class FieldError {
 }
 
 @ObjectType()
-class Userresolveponse {
+class UserResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
@@ -47,6 +39,11 @@ class Userresolveponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Ctx() { em }: MyContext
+  ) {}
   @Query(() => User, { nullable: true })
   async me(@Ctx() { em, req }: MyContext) {
     // not logged in
@@ -58,37 +55,23 @@ export class UserResolver {
     return user;
   }
 
-  @Mutation(() => Userresolveponse)
+  @Mutation(() => UserResponse)
   async registerUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
-  ): Promise<Userresolveponse> {
-    if (input.username.length <= 3) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "username must be longer than 3 characters!",
-          },
-        ],
-      };
+  ): Promise<UserResponse> {
+    const errors = await validateRegister(input);
+    if (errors) {
+      return { errors };
     }
-    if (input.password.length <= 3) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "password must be longer than 3 characters!",
-          },
-        ],
-      };
-    }
+
     const salt = randomBytes(16).toString("hex");
     const buffer = (await scryptAsync(input.password, salt, 64)) as Buffer;
     const hashedPassword = `${salt}.${buffer.toString("hex")}`;
     const user = em.create(User, {
       username: input.username,
       password: hashedPassword,
+      email: input.email,
     });
     try {
       await em.persistAndFlush(user);
@@ -113,12 +96,18 @@ export class UserResolver {
     return { user };
   }
 
-  @Mutation(() => Userresolveponse)
+  @Mutation(() => UserResponse)
   async loginUser(
-    @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: MyContext
-  ): Promise<Userresolveponse> {
-    const user = await em.findOne(User, { username: input.username });
+  ): Promise<UserResponse> {
+    const user = await em.findOne(
+      User,
+      usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail }
+    );
     if (!user) {
       return {
         errors: [
@@ -131,11 +120,7 @@ export class UserResolver {
     }
     const [salt, hashedPassword] = user.password.split(".");
     const keyBuffer = Buffer.from(hashedPassword, "hex");
-    const derivedBuffer = (await scryptAsync(
-      input.password,
-      salt,
-      64
-    )) as Buffer;
+    const derivedBuffer = (await scryptAsync(password, salt, 64)) as Buffer;
     // compare the new supplied password with the stored hashed password
     if (!timingSafeEqual(keyBuffer, derivedBuffer)) {
       return {
