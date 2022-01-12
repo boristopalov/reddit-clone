@@ -13,6 +13,7 @@ const session = require("express-session");
 import { MyContext } from "./types";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import cors from "cors";
+import { COOKIE_NAME } from "./constants";
 
 const RedisStore = require("connect-redis")(session);
 const redisClient = new Redis();
@@ -29,7 +30,7 @@ const main = async () => {
   const app = express();
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,

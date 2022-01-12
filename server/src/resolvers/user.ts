@@ -15,6 +15,8 @@ import { promisify } from "util";
 // promisify scrypt so we can use await syntax instead of callback
 const scryptAsync = promisify(scrypt);
 
+import { COOKIE_NAME } from "../constants";
+
 @InputType()
 class UsernamePasswordInput {
   @Field()
@@ -35,7 +37,7 @@ class FieldError {
 }
 
 @ObjectType()
-class UserResponse {
+class Userresolveponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
@@ -56,11 +58,11 @@ export class UserResolver {
     return user;
   }
 
-  @Mutation(() => UserResponse)
+  @Mutation(() => Userresolveponse)
   async registerUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
-  ): Promise<UserResponse> {
+  ): Promise<Userresolveponse> {
     if (input.username.length <= 3) {
       return {
         errors: [
@@ -111,11 +113,11 @@ export class UserResolver {
     return { user };
   }
 
-  @Mutation(() => UserResponse)
+  @Mutation(() => Userresolveponse)
   async loginUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
-  ): Promise<UserResponse> {
+  ): Promise<Userresolveponse> {
     const user = await em.findOne(User, { username: input.username });
     if (!user) {
       return {
@@ -154,5 +156,20 @@ export class UserResolver {
   @Query(() => [User])
   getUsers(@Ctx() { em }: MyContext) {
     return em.find(User, {});
+  }
+
+  @Mutation(() => Boolean)
+  logoutUser(@Ctx() { req, res }: MyContext) {
+    return new Promise((resolve) =>
+      req.session.destroy((e) => {
+        res.clearCookie(COOKIE_NAME);
+        if (e) {
+          console.error(e);
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+    );
   }
 }
