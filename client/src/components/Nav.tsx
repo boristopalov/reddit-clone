@@ -13,15 +13,23 @@ import {
 import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
+import { isServer } from "../utils/isServer";
 
 interface Props {}
 
 const Nav: React.FC<Props> = () => {
-  const { data, loading, error } = useMeQuery();
+  const { data, loading, error } = useMeQuery({ ssr: isServer() });
   const [logout, { loading: logoutLoading }] = useLogoutMutation();
   let body = null;
 
-  if (loading) return <Spinner />;
+  if (loading)
+    return (
+      <Flex background="grey" mt={"4"}>
+        <Box ml="auto" mr="auto">
+          <Spinner />
+        </Box>
+      </Flex>
+    );
 
   if (error)
     return (

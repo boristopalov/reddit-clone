@@ -9,6 +9,7 @@ import {
   OrderedList,
   Spinner,
 } from "@chakra-ui/react";
+import { addApolloState, initializeApollo } from "../apollo-client";
 import Nav from "../components/Nav";
 
 const postsQuery = gql`
@@ -48,5 +49,16 @@ const Index = () => {
     </div>
   );
 };
+
+export async function getServerSideProps() {
+  const client = initializeApollo();
+  await client.query({
+    query: postsQuery,
+  });
+
+  return addApolloState(client, {
+    props: {},
+  });
+}
 
 export default Index;
