@@ -14,9 +14,11 @@ import { promisify } from "util";
 // promisify scrypt so we can use await syntax instead of callback
 const scryptAsync = promisify(scrypt);
 
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import UsernamePasswordInput from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 // if username or password is wrong
 @ObjectType()
@@ -39,11 +41,90 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => UserResponse)
+  async resetPassword(
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { em, redis, req }: MyContext
+  ): Promise<UserResponse> {
+    if (newPassword.length <= 3) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: "password must be longer than 3 characters!",
+          },
+        ],
+      };
+    }
+
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "reset password link is expired",
+          },
+        ],
+      };
+    }
+    await redis.del(key);
+
+    const user = await em.findOne(User, { id: parseInt(userId) });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+    const salt = randomBytes(16).toString("hex");
+    const buffer = (await scryptAsync(newPassword, salt, 64)) as Buffer;
+    const hashedPassword = `${salt}.${buffer.toString("hex")}`;
+    user.password = hashedPassword;
+    await em.persistAndFlush(user);
+
+    // log the user in after they reset the password
+    req.session.userId = user.id;
+    return { user };
+  }
+
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("usernameOrEmail") usernameOrEmail: string,
-    @Ctx() { em }: MyContext
-  ) {}
+    @Ctx() { em, redis }: MyContext
+  ) {
+    const user = await em.findOne(
+      User,
+      usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail }
+    );
+    // return true so that a user can't abuse and search for emails until it works
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+    await redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      1000 * 60 * 60 * 24
+    );
+
+    await sendEmail(
+      user.email,
+      `<a href="http://localhost:3000/resetpass/${token}"> Reset password </a>`
+    );
+    return true;
+  }
   @Query(() => User, { nullable: true })
   async me(@Ctx() { em, req }: MyContext) {
     // not logged in
@@ -112,8 +193,8 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
-            message: "an account with that username does not exist",
+            field: "usernameOrEmail",
+            message: "an account with that username or email does not exist",
           },
         ],
       };

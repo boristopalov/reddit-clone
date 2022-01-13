@@ -21,7 +21,7 @@ const postsQuery = gql`
   }
 `;
 
-const Index = () => {
+const Index = (): JSX.Element => {
   const { data, error, loading } = useQuery(postsQuery);
 
   if (loading) return <Spinner />;

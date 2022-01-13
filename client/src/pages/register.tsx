@@ -6,19 +6,26 @@ import InputField from "../components/InputField";
 import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
+import { NextPage } from "next";
 
 interface Props {}
 
-const Register: React.FC<Props> = () => {
+const Register = (props: Props): JSX.Element => {
   const router = useRouter();
   const [registerUser] = useRegisterMutation();
   return (
     <Wrapper variant="small">
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ email: "", username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const res = await registerUser({
-            variables: { username: values.username, password: values.password },
+            variables: {
+              input: {
+                email: values.email,
+                username: values.username,
+                password: values.password,
+              },
+            },
             update: (cache, { data }) => {
               const registeredUser = data?.registerUser.user;
               // don't directly mutate userData
@@ -42,11 +49,14 @@ const Register: React.FC<Props> = () => {
       >
         {({ isSubmitting }) => (
           <Form>
-            <InputField
-              name="username"
-              label="Username"
-              placeholder="username"
-            />
+            <InputField name="email" label="Email" placeholder="email" />
+            <Box mt={4}>
+              <InputField
+                name="username"
+                label="Username"
+                placeholder="username"
+              />
+            </Box>
             <Box mt={4}>
               <InputField
                 name="password"
