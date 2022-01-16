@@ -1,10 +1,11 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
+import { User } from "./User";
 
 @ObjectType()
 @Entity()
 export class Post {
-  @Field( () => Int )
+  @Field(() => Int)
   @PrimaryKey()
   id!: number;
 
@@ -14,10 +15,24 @@ export class Post {
 
   @Field()
   @Property()
+  text!: string;
+
+  @Field(() => Int)
+  @Property()
+  score: number = 1;
+
+  @ManyToOne(() => User)
+  creator: User;
+
+  @Field()
+  @Property()
+  creatorId!: number;
+
+  @Field()
+  @Property()
   createdAt: Date = new Date();
 
   @Field()
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
-
 }
