@@ -79,7 +79,7 @@ const Nav: React.FC<Props> = () => {
   }
 
   return (
-    <Flex background="gray" padding={4}>
+    <Flex background="gray" position="sticky" zIndex={1} top={0} padding={4}>
       <Box ml="auto">{body}</Box>
     </Flex>
   );

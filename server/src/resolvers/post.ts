@@ -11,7 +11,7 @@ import {
   Field,
   UseMiddleware,
 } from "type-graphql";
-import { isAuth } from "src/middleware/isAuth";
+import { isAuth } from "../middleware/isAuth";
 
 @InputType()
 class PostInput {
