@@ -5,12 +5,15 @@ import {
   AlertIcon,
   AlertTitle,
   CloseButton,
+  Link,
   ListItem,
   OrderedList,
   Spinner,
 } from "@chakra-ui/react";
 import { addApolloState, initializeApollo } from "../apollo-client";
 import Nav from "../components/Nav";
+import NextLink from "next/link";
+import Wrapper from "../components/Wrapper";
 
 const postsQuery = gql`
   query {
@@ -35,18 +38,22 @@ const Index = (): JSX.Element => {
           The query provided did not retreieve any data. Please provide a valid
           query.
         </AlertDescription>
-        <CloseButton position="absolute" right="8px" top="8px" />
       </Alert>
     );
   return (
-    <div>
+    <>
       <Nav />
-      <OrderedList>
-        {data?.posts.map((post: any) => (
-          <ListItem key={post.id}> Title: {post.title} </ListItem>
-        ))}
-      </OrderedList>
-    </div>
+      <Wrapper>
+        <NextLink href="/create-post">
+          <Link>Create Post</Link>
+        </NextLink>
+        <OrderedList>
+          {data?.posts.map((post: any) => (
+            <ListItem key={post.id}> Title: {post.title} </ListItem>
+          ))}
+        </OrderedList>
+      </Wrapper>
+    </>
   );
 };
 

@@ -21,11 +21,7 @@ import {
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 
-interface Props {
-  token: string;
-}
-
-const resetPassword: NextPage<Props> = ({ token }) => {
+const resetPassword: NextPage = () => {
   const router = useRouter();
   const [resetPassword] = useResetPasswordMutation();
   const [tokenError, setTokenError] = useState("");
@@ -38,7 +34,10 @@ const resetPassword: NextPage<Props> = ({ token }) => {
           console.log(values);
           const res = await resetPassword({
             variables: {
-              token: token,
+              token:
+                typeof router.query.token === "string"
+                  ? router.query.token
+                  : "",
               newPassword: values.newPassword,
             },
             update: (cache, { data }) => {
@@ -99,13 +98,6 @@ const resetPassword: NextPage<Props> = ({ token }) => {
       </Formik>
     </Wrapper>
   );
-};
-
-// getInitialProps get us any query parameters from URL and pass it to our component
-resetPassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
 };
 
 export default resetPassword;

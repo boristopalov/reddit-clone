@@ -46,7 +46,9 @@ const Login = (props: Props): JSX.Element => {
           if (res.data?.loginUser.errors) {
             setErrors(toErrorMap(res.data.loginUser.errors));
           } else if (res.data?.loginUser.user) {
-            router.push("/");
+            if (typeof router.query.next === "string") {
+              router.push(router.query.next || "/");
+            } else router.push("/");
           }
         }}
       >

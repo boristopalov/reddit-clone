@@ -5,7 +5,7 @@ import {
   FormErrorMessage,
   Textarea,
 } from "@chakra-ui/react";
-import { FieldHookConfig, useField } from "formik";
+import { useField } from "formik";
 import React, { InputHTMLAttributes } from "react";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
@@ -16,7 +16,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
 };
 
 const InputField = (props: Props): JSX.Element => {
-  const { name, label, textarea } = props;
+  const { placeholder, label, textarea } = props;
   const [field, { error }] = useField(props);
   let InputOrTextArea = Input;
 
@@ -33,7 +33,7 @@ const InputField = (props: Props): JSX.Element => {
         {...field}
         {...props}
         id={field.name}
-        placeholder={props.placeholder}
+        placeholder={placeholder}
       />
       {<FormErrorMessage>{error}</FormErrorMessage> || null}
     </FormControl>

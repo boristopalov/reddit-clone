@@ -15,7 +15,7 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-co
 import cors from "cors";
 import { COOKIE_NAME } from "./constants";
 import { Redis } from "ioredis";
-import { Post } from "./entities/Post";
+// import { Post } from "./entities/Post";
 
 const main = async () => {
   const RedisStore = require("connect-redis")(session);
