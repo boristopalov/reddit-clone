@@ -10,7 +10,7 @@ const Index = (): JSX.Element => {
   // console.log(initialApolloState);
   const { data, loading, fetchMore, variables } = useGetPostsQuery({
     variables: {
-      limit: 10,
+      limit: 20,
       cursor: null,
     },
     notifyOnNetworkStatusChange: true,

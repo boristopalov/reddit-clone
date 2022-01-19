@@ -3,19 +3,13 @@ import { Form, Formik } from "formik";
 import { Box, Button, Flex, Link } from "@chakra-ui/react";
 import Wrapper from "../components/Wrapper";
 import InputField from "../components/InputField";
-import {
-  MeDocument,
-  MeQuery,
-  MeQueryResult,
-  useLoginMutation,
-} from "../generated/graphql";
+import { MeDocument, MeQuery, useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
+import withApollo from "../withApollo";
 
-interface Props {}
-
-const Login = (props: Props): JSX.Element => {
+const Login = (): JSX.Element => {
   const router = useRouter();
   const [loginUser] = useLoginMutation();
   return (
@@ -84,4 +78,4 @@ const Login = (props: Props): JSX.Element => {
   );
 };
 
-export default Login;
+export default withApollo({ ssr: false })(Login);

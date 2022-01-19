@@ -5,8 +5,10 @@ import React from "react";
 import InputField from "../components/InputField";
 import Wrapper from "../components/Wrapper";
 import Nav from "../components/Nav";
-import { useCreatePostMutation, useMeQuery } from "../generated/graphql";
+import { GetPostsDocument, useCreatePostMutation } from "../generated/graphql";
 import { useIsAuth } from "../utils/useIsAuth";
+import withApollo from "../withApollo";
+import { useApolloClient } from "@apollo/client";
 
 const CreatePost = (): JSX.Element => {
   useIsAuth();
@@ -23,6 +25,7 @@ const CreatePost = (): JSX.Element => {
                 input: { text: values.text, title: values.title },
               },
             });
+
             if (errors) {
               router.push("/login");
             } else {
@@ -66,4 +69,4 @@ const CreatePost = (): JSX.Element => {
   );
 };
 
-export default CreatePost;
+export default withApollo({ ssr: false })(CreatePost);

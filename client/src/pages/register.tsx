@@ -6,11 +6,9 @@ import InputField from "../components/InputField";
 import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
-import { NextPage } from "next";
+import withApollo from "../withApollo";
 
-interface Props {}
-
-const Register = (props: Props): JSX.Element => {
+const Register = (): JSX.Element => {
   const router = useRouter();
   const [registerUser] = useRegisterMutation();
   return (
@@ -80,4 +78,4 @@ const Register = (props: Props): JSX.Element => {
   );
 };
 
-export default Register;
+export default withApollo({ ssr: false })(Register);

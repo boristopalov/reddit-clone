@@ -19,6 +19,7 @@ import {
   useResetPasswordMutation,
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
+import withApollo from "../../withApollo";
 
 const resetPassword: NextPage = () => {
   const router = useRouter();
@@ -99,4 +100,4 @@ const resetPassword: NextPage = () => {
   );
 };
 
-export default resetPassword;
+export default withApollo({ ssr: false })(resetPassword);
