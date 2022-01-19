@@ -12,6 +12,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
+import { EntityManager } from "@mikro-orm/mysql"; // or any other driver package
 
 @InputType()
 class PostInput {
@@ -25,15 +26,32 @@ class PostInput {
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(
+  async posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
     @Ctx()
     context: MyContext
-  ) {
-    return context.em.find(Post, {});
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+    const em = context.em as EntityManager;
+    const qb = em
+      .createQueryBuilder(Post)
+      .select("*")
+      .orderBy({ createdAt: "desc" })
+      .limit(realLimit);
+
+    if (cursor) {
+      qb.where({ createdAt: { $lt: cursor } });
+    }
+
+    console.log("QUERY: ", qb.getQuery());
+    const res = await qb.execute();
+
+    return res;
   }
 
   @Query(() => Post, { nullable: true })
-  post(
+  async post(
     @Arg("id", () => Int)
     id: number,
     @Ctx()

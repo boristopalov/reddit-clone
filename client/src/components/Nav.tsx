@@ -14,12 +14,14 @@ import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { useApolloClient } from "@apollo/client";
 
 interface Props {}
 
 const Nav: React.FC<Props> = () => {
-  const { data, loading, error } = useMeQuery({ ssr: isServer() });
+  const { data, loading, error } = useMeQuery({ skip: isServer() });
   const [logout, { loading: logoutLoading }] = useLogoutMutation();
+  const apolloClient = useApolloClient();
   let body = null;
 
   if (loading)
@@ -55,20 +57,15 @@ const Nav: React.FC<Props> = () => {
       </>
     );
   } else {
-    console.log(data.me.id);
     body = (
       <>
         {data.me.username}
         <Button
           variant="link"
           ml={2}
-          onClick={() => {
-            logout({
-              update: (cache, {}) => {
-                cache.evict({ id: `User:${data.me?.id}` });
-                cache.gc();
-              },
-            });
+          onClick={async () => {
+            await logout();
+            await apolloClient.resetStore();
           }}
           isLoading={logoutLoading}
         >

@@ -18,17 +18,15 @@ const CreatePost = (): JSX.Element => {
         <Formik
           initialValues={{ title: "", text: "" }}
           onSubmit={async (values) => {
-            try {
-              await createPost({
-                variables: {
-                  input: { text: values.text, title: values.title },
-                },
-              });
+            const { errors } = await createPost({
+              variables: {
+                input: { text: values.text, title: values.title },
+              },
+            });
+            if (errors) {
+              router.push("/login");
+            } else {
               router.push("/");
-            } catch (e: any) {
-              if (e.message.includes("not logged in")) {
-                router.push("/login");
-              }
             }
 
             // if (error?.message.includes("not authenticated")) {

@@ -1,45 +1,41 @@
-import { gql, useQuery } from "@apollo/client";
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  CloseButton,
-  Link,
-  ListItem,
-  OrderedList,
-  Spinner,
-} from "@chakra-ui/react";
-import { addApolloState, initializeApollo } from "../apollo-client";
+import { Link, ListItem, OrderedList, Spinner } from "@chakra-ui/react";
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-
-const postsQuery = gql`
-  query {
-    posts {
-      id
-      title
-    }
-  }
-`;
+import { GetPostsDocument, useGetPostsQuery } from "../generated/graphql";
+import { isServer } from "../utils/isServer";
+import withApollo from "../withApollo";
 
 const Index = (): JSX.Element => {
-  const { data, error, loading } = useQuery(postsQuery);
+  // console.log(initialApolloState);
+  const { data, loading, fetchMore, variables } = useGetPostsQuery({
+    variables: {
+      limit: 10,
+      cursor: null,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
 
   if (loading) return <Spinner />;
 
-  if (error)
-    return (
-      <Alert status="error">
-        <AlertIcon />
-        <AlertTitle mr={2}>Invalid Query!</AlertTitle>
-        <AlertDescription>
-          The query provided did not retreieve any data. Please provide a valid
-          query.
-        </AlertDescription>
-      </Alert>
-    );
+  // fetchMore({
+  //   variables: {
+  //     limit: variables?.limit,
+  //     cursor: data?.posts[data.posts.length - 1].createdAt,
+  //   },
+  //  updateQuery: (previousValue, {fetchMoreResult}): GetPostsQuery => {
+  //   if (!fetchMoreResult) {
+  //     return previousValue as GetPostsQuery;
+  //   }
+  //   return {
+  //     __typename: "Query",
+  //     posts: {
+  //       hasMore: fetchMoreResult
+  //     }
+  //   }
+  // }
+  // })
+
   return (
     <>
       <Nav />
@@ -57,15 +53,21 @@ const Index = (): JSX.Element => {
   );
 };
 
-export async function getServerSideProps() {
-  const client = initializeApollo();
-  await client.query({
-    query: postsQuery,
-  });
+// export async function getServerSideProps() {
+//   const client = initializeApollo();
+//   const { data: ssrData } = await client.query({
+//     query: GetPostsDocument,
+//     variables: {
+//       limit: 10,
+//     },
+//   });
 
-  return addApolloState(client, {
-    props: {},
-  });
-}
+//   return {
+//     props: {
+//       initialApolloState: client.cache.extract(),
+//       ssrData,
+//     },
+//   };
+// }
 
-export default Index;
+export default withApollo({ ssr: true })(Index);

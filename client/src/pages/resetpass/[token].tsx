@@ -5,11 +5,10 @@ import {
   AlertTitle,
   Box,
   Button,
-  CloseButton,
 } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
 import { NextPage } from "next";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import React from "react";
 import { useState } from "react";
 import InputField from "../../components/InputField";
