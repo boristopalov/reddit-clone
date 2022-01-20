@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { Field, Int, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType, Root } from "type-graphql";
 import { User } from "./User";
 
 @ObjectType()
@@ -16,6 +16,11 @@ export class Post {
   @Field()
   @Property()
   text!: string;
+
+  @Field(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50);
+  }
 
   @Field(() => Int)
   @Property()

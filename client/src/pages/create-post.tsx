@@ -5,10 +5,9 @@ import React from "react";
 import InputField from "../components/InputField";
 import Wrapper from "../components/Wrapper";
 import Nav from "../components/Nav";
-import { GetPostsDocument, useCreatePostMutation } from "../generated/graphql";
+import { useCreatePostMutation } from "../generated/graphql";
 import { useIsAuth } from "../utils/useIsAuth";
 import withApollo from "../withApollo";
-import { useApolloClient } from "@apollo/client";
 
 const CreatePost = (): JSX.Element => {
   useIsAuth();

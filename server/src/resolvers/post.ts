@@ -10,6 +10,7 @@ import {
   InputType,
   Field,
   UseMiddleware,
+  ObjectType,
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { EntityManager } from "@mikro-orm/mysql"; // or any other driver package
@@ -23,22 +24,30 @@ class PostInput {
   text: string;
 }
 
-@Resolver()
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: boolean;
+}
+
+@Resolver(Post)
 export class PostResolver {
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
     @Ctx()
     context: MyContext
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const em = context.em as EntityManager;
     const qb = em
       .createQueryBuilder(Post)
       .select("*")
       .orderBy({ createdAt: "desc" })
-      .limit(realLimit);
+      .limit(realLimit + 1);
 
     if (cursor) {
       qb.where({ createdAt: { $lt: cursor } });
@@ -47,7 +56,10 @@ export class PostResolver {
     console.log("QUERY: ", qb.getQuery());
     const res = await qb.execute();
 
-    return res;
+    return {
+      posts: res.slice(0, realLimit),
+      hasMore: res.length === realLimit + 1,
+    };
   }
 
   @Query(() => Post, { nullable: true })
