@@ -1,4 +1,4 @@
-import { Box, Flex, Button, Link } from "@chakra-ui/react";
+import { Box, Flex, Button } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
 import React from "react";
 import InputField from "../components/InputField";
@@ -6,9 +6,8 @@ import Wrapper from "../components/Wrapper";
 import { useForgotPasswordMutation } from "../generated/graphql";
 import { useState } from "react";
 import withApollo from "../withApollo";
-interface Props {}
 
-const ForgotPassword = (props: Props): JSX.Element => {
+const ForgotPassword = (): JSX.Element => {
   const [sentLink, setSentLink] = useState(false);
   const [forgotPassword] = useForgotPasswordMutation();
   return (

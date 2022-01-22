@@ -8,6 +8,8 @@ import {
   Mutation,
   Query,
   ObjectType,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -39,8 +41,17 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(() => User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    // if logged in user is the user getting fetched
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return "";
+  }
+
   @Mutation(() => UserResponse)
   async resetPassword(
     @Arg("token") token: string,

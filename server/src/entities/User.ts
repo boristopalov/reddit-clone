@@ -5,7 +5,8 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { Field, Int, ObjectType } from "type-graphql";
+import { MyContext } from "src/types";
+import { Ctx, Field, Int, ObjectType, Root } from "type-graphql";
 import { Post } from "./Post";
 
 @ObjectType()

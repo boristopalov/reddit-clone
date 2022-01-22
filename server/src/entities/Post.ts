@@ -26,6 +26,7 @@ export class Post {
   @Property()
   score: number = 1;
 
+  @Field()
   @ManyToOne(() => User)
   creator: User;
 

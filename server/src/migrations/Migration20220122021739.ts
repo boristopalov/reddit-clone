@@ -1,6 +1,6 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20220120031357 extends Migration {
+export class Migration20220120031358 extends Migration {
   async up(): Promise<void> {
     this
       .addSql(`insert into post (title, text, score, "creator_id", "created_at", "updated_at") values ('logistical', 'Nulla ac enim.', 1, 3, '2021-10-05T10:06:54Z', '2021-03-02T05:21:48Z');

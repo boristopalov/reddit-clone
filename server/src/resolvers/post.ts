@@ -43,18 +43,24 @@ export class PostResolver {
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const em = context.em as EntityManager;
-    const qb = em
-      .createQueryBuilder(Post)
-      .select("*")
-      .orderBy({ createdAt: "desc" })
-      .limit(realLimit + 1);
+    const connection = em.getConnection();
 
-    if (cursor) {
-      qb.where({ createdAt: { $lt: cursor } });
-    }
-
-    console.log("QUERY: ", qb.getQuery());
-    const res = await qb.execute();
+    const res: Post[] = await connection.execute(
+      `select p.id, p.title, p.text, p,score, p.creator_id as "creatorId", p.created_at as "createdAt", p.updated_at as "updatedAt",
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'email', u.email
+        ) creator 
+      from post p
+      inner join public.user u 
+      on p.creator_id = u.id
+    ${cursor ? `where p.created_at < ?` : ""} 
+    order by p.created_at DESC 
+    limit ?`,
+      [cursor, realLimit + 1]
+    );
+    console.log("QUERY: ", res);
 
     return {
       posts: res.slice(0, realLimit),

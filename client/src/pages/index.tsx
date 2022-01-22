@@ -11,11 +11,10 @@ import {
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-import { GetPostsQuery, useGetPostsQuery } from "../generated/graphql";
+import { useGetPostsQuery } from "../generated/graphql";
 import withApollo from "../withApollo";
 
 const Index = (): JSX.Element => {
-  // console.log(initialApolloState);
   const { data, loading, fetchMore, variables } = useGetPostsQuery({
     variables: {
       limit: 20,
@@ -23,12 +22,6 @@ const Index = (): JSX.Element => {
     },
     notifyOnNetworkStatusChange: true,
   });
-
-  if (loading && !data) return <Spinner />;
-
-  if (!loading && !data) {
-    return <div> Query Failed </div>;
-  }
 
   const fetchMorePosts = () => {
     fetchMore({
@@ -38,6 +31,12 @@ const Index = (): JSX.Element => {
       },
     });
   };
+
+  if (loading && !data) return <Spinner />;
+
+  if (!loading && !data) {
+    return <div> Query Failed </div>;
+  }
 
   return (
     <>
@@ -57,35 +56,27 @@ const Index = (): JSX.Element => {
             </Box>
           ))}
         </Stack>
-        <Button
-          my={10}
-          colorScheme="blue"
-          size="lg"
-          isLoading={loading}
-          onClick={fetchMorePosts}
-        >
-          More Posts
-        </Button>
+        {data?.posts.hasMore ? (
+          <Button
+            my={10}
+            colorScheme="blue"
+            size="lg"
+            isLoading={loading}
+            onClick={fetchMorePosts}
+          >
+            More Posts
+          </Button>
+        ) : (
+          <Flex justifyContent="center">
+            <Box mt={8} pb={8}>
+              {" "}
+              No more posts!
+            </Box>
+          </Flex>
+        )}
       </Wrapper>
     </>
   );
 };
-
-// export async function getServerSideProps() {
-//   const client = initializeApollo();
-//   const { data: ssrData } = await client.query({
-//     query: GetPostsDocument,
-//     variables: {
-//       limit: 10,
-//     },
-//   });
-
-//   return {
-//     props: {
-//       initialApolloState: client.cache.extract(),
-//       ssrData,
-//     },
-//   };
-// }
 
 export default withApollo({ ssr: true })(Index);
