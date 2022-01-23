@@ -9,6 +9,7 @@ import {
   CloseButton,
   Spinner,
   Button,
+  Heading,
 } from "@chakra-ui/react";
 import React from "react";
 import NextLink from "next/link";
@@ -59,6 +60,11 @@ const Nav: React.FC<Props> = () => {
   } else {
     body = (
       <>
+        <NextLink href="/create-post">
+          <Button mr={8} colorScheme="blue">
+            Create Post
+          </Button>
+        </NextLink>
         {data.me.username}
         <Button
           variant="link"
@@ -77,7 +83,14 @@ const Nav: React.FC<Props> = () => {
 
   return (
     <Flex background="gray" position="sticky" zIndex={1} top={0} padding={4}>
-      <Box ml="auto">{body}</Box>
+      <NextLink href="/">
+        <Link>
+          <Heading pl={4}> Raddit </Heading>
+        </Link>
+      </NextLink>
+      <Flex ml="auto" alignItems="center" pr={4}>
+        {body}
+      </Flex>
     </Flex>
   );
 };

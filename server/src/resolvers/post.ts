@@ -164,7 +164,7 @@ export class PostResolver {
     @Ctx()
     context: MyContext
   ) {
-    return context.em.findOne(Post, { id });
+    return context.em.findOne(Post, { id }, ["creator"]);
   }
 
   @Mutation(() => Post)

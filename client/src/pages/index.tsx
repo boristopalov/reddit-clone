@@ -43,18 +43,16 @@ const Index = (): JSX.Element => {
     <>
       <Nav />
       <Wrapper>
-        <Flex align="center" justifyContent="space-between" mb={8}>
-          <Heading> Raddit </Heading>
-          <NextLink href="/create-post">
-            <Link>Create Post</Link>
-          </NextLink>
-        </Flex>
         <Stack spacing={8}>
           {data!.posts.posts.map((post) => (
             <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
               <UpvoteSection post={post} />
               <Box>
-                <Heading fontSize="2xl">{post.title}</Heading>
+                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                  <Link>
+                    <Heading fontSize="2xl">{post.title}</Heading>
+                  </Link>
+                </NextLink>
                 <Text fontSize="md" fontStyle="italic">
                   Posted by {post.creator.username}
                 </Text>
