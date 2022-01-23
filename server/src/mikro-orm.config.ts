@@ -2,6 +2,7 @@ import { Options } from "@mikro-orm/core";
 import path from "path";
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
+import { Upvote } from "./entities/Upvote";
 import { User } from "./entities/User";
 require("dotenv").config();
 
@@ -18,7 +19,7 @@ const config: Options = {
     safe: false, // allow to disable table and column dropping
     emit: "ts", // migration generation mode
   },
-  entities: [Post, User],
+  entities: [Post, User, Upvote],
   dbName: "reddit",
   user: process.env.DB_USER,
   password: process.env.DB_PASS,

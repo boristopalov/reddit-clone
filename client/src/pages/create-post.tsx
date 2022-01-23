@@ -23,6 +23,9 @@ const CreatePost = (): JSX.Element => {
               variables: {
                 input: { text: values.text, title: values.title },
               },
+              update: (cache) => {
+                cache.evict({ fieldName: "posts" });
+              },
             });
 
             if (errors) {
@@ -30,14 +33,6 @@ const CreatePost = (): JSX.Element => {
             } else {
               router.push("/");
             }
-
-            // if (error?.message.includes("not authenticated")) {
-            // } else router.push("/");
-
-            // if (res.data?.loginUser.errors) {
-            //   setErrors(toErrorMap(res.data.loginUser.errors));
-            // } else if (res.data?.loginUser.user) {
-            // }
           }}
         >
           {({ isSubmitting }) => (

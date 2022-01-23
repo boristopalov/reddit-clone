@@ -13,6 +13,7 @@ import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
 import { useGetPostsQuery } from "../generated/graphql";
 import withApollo from "../withApollo";
+import UpvoteSection from "../components/UpvoteSection";
 
 const Index = (): JSX.Element => {
   const { data, loading, fetchMore, variables } = useGetPostsQuery({
@@ -50,10 +51,18 @@ const Index = (): JSX.Element => {
         </Flex>
         <Stack spacing={8}>
           {data!.posts.posts.map((post) => (
-            <Box p={5} shadow="md" borderWidth="1px" key={post.id}>
-              <Heading fontSize="xl">{post.title}</Heading>
-              <Text mt={4}>{post.textSnippet}</Text>
-            </Box>
+            <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
+              <UpvoteSection post={post} />
+              <Box>
+                <Heading fontSize="2xl">{post.title}</Heading>
+                <Text fontSize="md" fontStyle="italic">
+                  Posted by {post.creator.username}
+                </Text>
+                <Text mt={4} fontSize="sm">
+                  {post.textSnippet}
+                </Text>
+              </Box>
+            </Flex>
           ))}
         </Stack>
         {data?.posts.hasMore ? (

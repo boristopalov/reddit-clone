@@ -14,6 +14,7 @@ import {
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { EntityManager } from "@mikro-orm/mysql"; // or any other driver package
+import { Upvote } from "../entities/Upvote";
 
 @InputType()
 class PostInput {
@@ -34,6 +35,78 @@ class PaginatedPosts {
 
 @Resolver(Post)
 export class PostResolver {
+  @Query(() => [Post])
+  async test(@Ctx() context: MyContext): Promise<Post[]> {
+    const em = context.em as EntityManager;
+    return await em.find(Post, {});
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { req, em }: MyContext
+  ) {
+    const isUpvote = value !== -1;
+    const realValue = isUpvote ? 1 : -1;
+    const userId = req.session.userId;
+    const upvote = await em.findOne(Upvote, { postId: postId, userId: userId });
+
+    // the user has already voted on this post
+    // and they are changing their vote
+    const emFork = em.fork(false);
+    const connection = em.getConnection();
+    if (upvote && upvote.value !== realValue) {
+      console.log("yooo");
+      try {
+        await emFork.begin();
+        await connection.execute(
+          `
+          update upvote
+          set value = ? 
+          where post_id = ? and user_id = ?;
+
+          update post 
+          set score = score + ?
+          where id = ?;
+          `,
+          [realValue, postId, userId, 2 * realValue, postId]
+        );
+        await emFork.commit();
+      } catch (e) {
+        console.log(e.message);
+        await emFork.rollback();
+        throw e;
+      }
+    }
+
+    // user has not voted before
+    else if (!upvote) {
+      try {
+        await emFork.begin();
+        await connection.execute(
+          `
+          insert into upvote(user_id, post_id, value)
+          values (?, ?, ?);
+    
+          update post 
+          set score = score + ?
+          where post.id = ?;
+          `,
+          [userId, postId, realValue, realValue, postId]
+        );
+        await emFork.commit();
+      } catch (e) {
+        console.log(e.message);
+        await emFork.rollback();
+        throw e;
+      }
+    }
+
+    return true;
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
@@ -44,6 +117,13 @@ export class PostResolver {
     const realLimit = Math.min(50, limit);
     const em = context.em as EntityManager;
     const connection = em.getConnection();
+
+    // i guess mikro-orm uses "?" as variables for native SQL queries
+    // but since the params change and i can't
+    // specify variables (ex. ?1, ?2) i need to dynamically change the order
+    const queryParams = cursor
+      ? [cursor, realLimit + 1]
+      : [realLimit + 1, cursor];
 
     const res: Post[] = await connection.execute(
       `select p.id, p.title, p.text, p,score, p.creator_id as "creatorId", p.created_at as "createdAt", p.updated_at as "updatedAt",
@@ -58,9 +138,8 @@ export class PostResolver {
     ${cursor ? `where p.created_at < ?` : ""} 
     order by p.created_at DESC 
     limit ?`,
-      [cursor, realLimit + 1]
+      queryParams
     );
-    console.log("QUERY: ", res);
 
     return {
       posts: res.slice(0, realLimit),
