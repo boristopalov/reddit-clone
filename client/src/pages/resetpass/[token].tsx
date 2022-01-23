@@ -19,7 +19,7 @@ import {
   useResetPasswordMutation,
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
-import withApollo from "../../withApollo";
+import { withApollo } from "../../withApollo";
 
 const resetPassword: NextPage = () => {
   const router = useRouter();
@@ -52,9 +52,9 @@ const resetPassword: NextPage = () => {
                 query: MeDocument,
                 data: { me: user },
               });
+              cache.evict({ fieldName: "posts" });
             },
           });
-
           if (res.data?.resetPassword.errors) {
             const errors = toErrorMap(res.data.resetPassword.errors);
 

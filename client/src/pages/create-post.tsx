@@ -7,7 +7,7 @@ import Wrapper from "../components/Wrapper";
 import Nav from "../components/Nav";
 import { useCreatePostMutation } from "../generated/graphql";
 import { useIsAuth } from "../utils/useIsAuth";
-import withApollo from "../withApollo";
+import { withApollo } from "../withApollo";
 
 const CreatePost = (): JSX.Element => {
   useIsAuth();
@@ -27,10 +27,10 @@ const CreatePost = (): JSX.Element => {
                 cache.evict({ fieldName: "posts" });
               },
             });
-
             if (errors) {
               router.push("/login");
             } else {
+              console.log("hello!");
               router.push("/");
             }
           }}

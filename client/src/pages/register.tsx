@@ -6,7 +6,7 @@ import InputField from "../components/InputField";
 import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
-import withApollo from "../withApollo";
+import { withApollo } from "../withApollo";
 
 const Register = (): JSX.Element => {
   const router = useRouter();
@@ -36,6 +36,7 @@ const Register = (): JSX.Element => {
                 query: MeDocument,
                 data: { me: registeredUser },
               });
+              // cache.evict({ fieldName: "posts" });
             },
           });
           if (res.data?.registerUser.errors) {

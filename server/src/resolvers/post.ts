@@ -136,10 +136,10 @@ export class PostResolver {
         'id', u.id,
         'username', u.username,
         'email', u.email
-        ) creator
+        ) creator,
       ${
         user
-          ? ',(select value from upvote where user_id = ? and post_id = p.id) "voteStatus"'
+          ? '(select value from upvote where user_id = ? and post_id = p.id) "voteStatus"'
           : 'null as "voteStatus"'
       }
       from post p
@@ -150,8 +150,6 @@ export class PostResolver {
     limit ?`,
       queryParams
     );
-
-    // console.log(res);
 
     return {
       posts: res.slice(0, realLimit),
@@ -175,11 +173,15 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { em, req }: MyContext
   ) {
-    const user = req.session.userId;
+    const userId = req.session.userId;
 
-    const post = em.create(Post, { ...input, creatorId: user });
+    const post: Post = em.create(Post, {
+      ...input,
+      creatorId: userId,
+    });
     await em.persistAndFlush(post);
-    return post;
+    console.log({ ...post });
+    return { ...post };
   }
 
   @Mutation(() => Post, { nullable: true })

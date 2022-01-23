@@ -5,7 +5,7 @@ import InputField from "../components/InputField";
 import Wrapper from "../components/Wrapper";
 import { useForgotPasswordMutation } from "../generated/graphql";
 import { useState } from "react";
-import withApollo from "../withApollo";
+import { withApollo } from "../withApollo";
 
 const ForgotPassword = (): JSX.Element => {
   const [sentLink, setSentLink] = useState(false);

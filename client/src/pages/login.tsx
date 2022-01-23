@@ -7,7 +7,7 @@ import { MeDocument, MeQuery, useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
-import withApollo from "../withApollo";
+import { withApollo } from "../withApollo";
 
 const Login = (): JSX.Element => {
   const router = useRouter();
@@ -34,6 +34,7 @@ const Login = (): JSX.Element => {
                 query: MeDocument,
                 data: { me: loggedInUser },
               });
+              cache.evict({ fieldName: "posts" });
             },
           });
 

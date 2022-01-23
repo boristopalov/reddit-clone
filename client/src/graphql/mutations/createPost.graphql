@@ -1,5 +1,11 @@
 mutation createPost($input: PostInput!) {
   createPost(input: $input) {
-    ...PostSnippet
+    id
+    createdAt
+    updatedAt
+    title
+    text
+    score
+    creatorId
   }
 }

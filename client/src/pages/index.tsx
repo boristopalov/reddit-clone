@@ -12,7 +12,7 @@ import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
 import { useGetPostsQuery } from "../generated/graphql";
-import withApollo from "../withApollo";
+import { withApollo } from "../withApollo";
 import UpvoteSection from "../components/UpvoteSection";
 
 const Index = (): JSX.Element => {

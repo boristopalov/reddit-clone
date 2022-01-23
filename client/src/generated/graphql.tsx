@@ -166,7 +166,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, voteStatus?: number | null | undefined, creator: { __typename?: 'User', id: number, username: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, createdAt: any, updatedAt: any, title: string, text: string, score: number, creatorId: number } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   usernameOrEmail: Scalars['String'];
@@ -248,10 +248,16 @@ export const RegularUserFragmentDoc = gql`
 export const CreatePostDocument = gql`
     mutation createPost($input: PostInput!) {
   createPost(input: $input) {
-    ...PostSnippet
+    id
+    createdAt
+    updatedAt
+    title
+    text
+    score
+    creatorId
   }
 }
-    ${PostSnippetFragmentDoc}`;
+    `;
 export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
 
 /**
