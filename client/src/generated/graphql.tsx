@@ -98,6 +98,7 @@ export type Post = {
   title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   upvotes?: Maybe<Array<Upvote>>;
+  voteStatus?: Maybe<Scalars['Int']>;
 };
 
 export type PostInput = {
@@ -156,7 +157,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, creator: { __typename?: 'User', id: number, username: string } };
+export type PostSnippetFragment = { __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, voteStatus?: number | null | undefined, creator: { __typename?: 'User', id: number, username: string } };
 
 export type RegularUserFragment = { __typename?: 'User', id: number, username: string };
 
@@ -165,7 +166,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, creator: { __typename?: 'User', id: number, username: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, voteStatus?: number | null | undefined, creator: { __typename?: 'User', id: number, username: string } } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   usernameOrEmail: Scalars['String'];
@@ -221,7 +222,7 @@ export type GetPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, creator: { __typename?: 'User', id: number, username: string } }> } };
+export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, title: string, score: number, textSnippet: string, createdAt: any, updatedAt: any, voteStatus?: number | null | undefined, creator: { __typename?: 'User', id: number, username: string } }> } };
 
 export const PostSnippetFragmentDoc = gql`
     fragment PostSnippet on Post {
@@ -231,6 +232,7 @@ export const PostSnippetFragmentDoc = gql`
   textSnippet
   createdAt
   updatedAt
+  voteStatus
   creator {
     id
     username

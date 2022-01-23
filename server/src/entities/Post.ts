@@ -38,6 +38,9 @@ export class Post {
   @OneToMany(() => Upvote, (upvote: Upvote) => upvote.post)
   upvotes: Collection<Upvote> = new Collection<Upvote>(this);
 
+  @Field(() => Int, { nullable: true })
+  voteStatus: number | null; // 1 if user has previously upvoted, -1 if user has previously downvoted, otehrwise null
+
   @Field()
   @ManyToOne(() => User)
   creator: User;

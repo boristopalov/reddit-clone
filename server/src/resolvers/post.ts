@@ -117,13 +117,18 @@ export class PostResolver {
     const realLimit = Math.min(50, limit);
     const em = context.em as EntityManager;
     const connection = em.getConnection();
+    const user = context.req.session.userId;
 
     // i guess mikro-orm uses "?" as variables for native SQL queries
     // but since the params change and i can't
     // specify variables (ex. ?1, ?2) i need to dynamically change the order
-    const queryParams = cursor
+    let queryParams = cursor
       ? [cursor, realLimit + 1]
       : [realLimit + 1, cursor];
+
+    if (user) {
+      queryParams = [user, ...queryParams];
+    }
 
     const res: Post[] = await connection.execute(
       `select p.id, p.title, p.text, p,score, p.creator_id as "creatorId", p.created_at as "createdAt", p.updated_at as "updatedAt",
@@ -131,7 +136,12 @@ export class PostResolver {
         'id', u.id,
         'username', u.username,
         'email', u.email
-        ) creator 
+        ) creator
+      ${
+        user
+          ? ',(select value from upvote where user_id = ? and post_id = p.id) "voteStatus"'
+          : 'null as "voteStatus"'
+      }
       from post p
       inner join public.user u 
       on p.creator_id = u.id
@@ -140,6 +150,8 @@ export class PostResolver {
     limit ?`,
       queryParams
     );
+
+    // console.log(res);
 
     return {
       posts: res.slice(0, realLimit),

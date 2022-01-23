@@ -1,12 +1,53 @@
-import { gql } from "@apollo/client";
+import { ApolloCache, gql } from "@apollo/client";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { Flex, IconButton } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
+import {
+  PostSnippetFragment,
+  useVoteMutation,
+  VoteMutation,
+} from "../generated/graphql";
 
 interface Props {
   post: PostSnippetFragment;
 }
+
+const updateAfterVote = (
+  cache: ApolloCache<VoteMutation>,
+  value: number,
+  postId: number
+) => {
+  const res: PostSnippetFragment | null = cache.readFragment({
+    id: "Post:" + postId,
+    fragment: gql`
+      fragment getScore on Post {
+        id
+        score
+        voteStatus
+      }
+    `,
+  });
+
+  if (res) {
+    if (res.voteStatus === value) {
+      return;
+    }
+    const newScore = res.score + (res.voteStatus ? 2 : 1) * value;
+    cache.writeFragment({
+      id: "Post:" + postId,
+      data: {
+        score: newScore,
+        voteStatus: value,
+      },
+      fragment: gql`
+        fragment updateScore on Post {
+          score
+          voteStatus
+        }
+      `,
+    });
+  }
+};
 
 const UpvoteSection = ({ post }: Props): JSX.Element => {
   const [postScore, setPostScore] = useState(post.score);
@@ -21,30 +62,38 @@ const UpvoteSection = ({ post }: Props): JSX.Element => {
     >
       <IconButton
         onClick={async () => {
+          if (post.voteStatus === 1) {
+            return;
+          }
           setPostScore(postScore + 1);
           await vote({
             variables: {
               value: 1,
               postId: post.id,
             },
+            update: (cache) => updateAfterVote(cache, 1, post.id),
           });
         }}
-        colorScheme="blackAlpha"
+        colorScheme={post.voteStatus === 1 ? "green" : "blackAlpha"}
         aria-label="upvote post"
         icon={<ChevronUpIcon w={8} h={8} />}
       />
       {post.score}
       <IconButton
         onClick={async () => {
+          if (post.voteStatus === -1) {
+            return;
+          }
           setPostScore(postScore - 1);
           await vote({
             variables: {
               value: -1,
               postId: post.id,
             },
+            update: (cache) => updateAfterVote(cache, -1, post.id),
           });
         }}
-        colorScheme="blackAlpha"
+        colorScheme={post.voteStatus === -1 ? "red" : "blackAlpha"}
         aria-label="downvote post"
         icon={<ChevronDownIcon w={8} h={8} />}
       />
