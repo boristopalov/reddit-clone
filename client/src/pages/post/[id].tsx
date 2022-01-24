@@ -3,7 +3,10 @@ import { useRouter } from "next/router";
 import React from "react";
 import Nav from "../../components/Nav";
 import Wrapper from "../../components/Wrapper";
-import { useGetPostQuery } from "../../generated/graphql";
+import {
+  useDeletePostMutation,
+  useGetPostQuery,
+} from "../../generated/graphql";
 import { withApollo } from "../../withApollo";
 
 interface Props {}
@@ -12,6 +15,7 @@ const Post = (props: Props): JSX.Element => {
   const router = useRouter();
   const postId =
     typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
+
   const { data, loading } = useGetPostQuery({
     // don't run the query if we have an invalid id url parameter
     skip: postId === -1,
@@ -28,15 +32,16 @@ const Post = (props: Props): JSX.Element => {
       <Wrapper>
         <Flex
           direction="column"
-          borderRadius="lg"
-          borderWidth="2px"
-          borderColor="blackAlpha.400"
-          padding={4}
+          borderWidth="1px"
+          borderColor="gray.200"
+          padding={5}
+          boxShadow="md"
         >
-          <Heading mb={6}>{data?.post?.title}</Heading>
-          <Box>{data?.post?.text}</Box>
-          <Box>{data?.post?.creator.username}</Box>
-          <Box>{data?.post?.score}</Box>
+          <Heading>{data?.post?.title}</Heading>
+          <Box fontStyle="italic" mb={4}>
+            {data?.post?.creator.username}
+          </Box>
+          <Box fontSize="lg">{data?.post?.text}</Box>
         </Flex>
       </Wrapper>
     </>

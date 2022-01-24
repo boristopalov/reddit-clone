@@ -7,13 +7,19 @@ import {
   Spinner,
   Stack,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-import { useGetPostsQuery } from "../generated/graphql";
+import {
+  useDeletePostMutation,
+  useGetPostsQuery,
+  useMeQuery,
+} from "../generated/graphql";
 import { withApollo } from "../withApollo";
 import UpvoteSection from "../components/UpvoteSection";
+import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 
 const Index = (): JSX.Element => {
   const { data, loading, fetchMore, variables } = useGetPostsQuery({
@@ -33,6 +39,10 @@ const Index = (): JSX.Element => {
     });
   };
 
+  const [deletePost, { error: deleteError }] = useDeletePostMutation();
+
+  const { data: meData } = useMeQuery();
+
   if (loading && !data) return <Spinner />;
 
   if (!loading && !data) {
@@ -47,7 +57,7 @@ const Index = (): JSX.Element => {
           {data!.posts.posts.map((post) => (
             <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
               <UpvoteSection post={post} />
-              <Box>
+              <Box flex={1}>
                 <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                   <Link>
                     <Heading fontSize="2xl">{post.title}</Heading>
@@ -56,9 +66,41 @@ const Index = (): JSX.Element => {
                 <Text fontSize="md" fontStyle="italic">
                   Posted by {post.creator.username}
                 </Text>
-                <Text mt={4} fontSize="sm">
-                  {post.textSnippet}
-                </Text>
+                <Flex>
+                  <Text flex={1} mt={4} fontSize="sm">
+                    {post.textSnippet}
+                  </Text>
+                  {meData?.me?.id !== post.creator.id ? null : (
+                    <Box>
+                      <NextLink
+                        href="/post/edit/[id]"
+                        as={`/post/edit/${post.id}`}
+                      >
+                        <IconButton
+                          aria-label="Edit Post"
+                          icon={<EditIcon />}
+                          colorScheme="blackAlpha"
+                          mr={2}
+                        />
+                      </NextLink>
+                      <IconButton
+                        aria-label="Delete Post"
+                        icon={<DeleteIcon />}
+                        colorScheme="blackAlpha"
+                        onClick={async () => {
+                          await deletePost({
+                            variables: {
+                              id: post.id,
+                            },
+                            update: (cache) => {
+                              cache.evict({ id: "Post:" + post.id });
+                            },
+                          });
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Flex>
               </Box>
             </Flex>
           ))}
@@ -76,7 +118,6 @@ const Index = (): JSX.Element => {
         ) : (
           <Flex justifyContent="center">
             <Box mt={8} pb={8}>
-              {" "}
               No more posts!
             </Box>
           </Flex>

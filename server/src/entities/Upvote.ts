@@ -1,4 +1,10 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Cascade,
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+} from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 import { Post } from "./Post";
 import { User } from "./User";
@@ -25,6 +31,9 @@ export class Upvote {
   postId: number;
 
   @Field(() => Post)
-  @ManyToOne(() => Post, { inversedBy: (post: Post) => post.upvotes })
+  @ManyToOne(() => Post, {
+    inversedBy: (post: Post) => post.upvotes,
+    cascade: [Cascade.REMOVE],
+  })
   post: Post;
 }

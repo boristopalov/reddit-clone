@@ -30,7 +30,6 @@ const CreatePost = (): JSX.Element => {
             if (errors) {
               router.push("/login");
             } else {
-              console.log("hello!");
               router.push("/");
             }
           }}

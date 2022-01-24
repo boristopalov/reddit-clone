@@ -56,7 +56,7 @@ export class PostResolver {
     // the user has already voted on this post
     // and they are changing their vote
     const emFork = em.fork(false);
-    const connection = em.getConnection();
+    const connection = emFork.getConnection();
     if (upvote && upvote.value !== realValue) {
       console.log("yooo");
       try {
@@ -189,31 +189,65 @@ export class PostResolver {
   async updatePost(
     @Arg("id", () => Int) id: number,
     @Arg("title", () => String, { nullable: true }) title: string,
-    @Ctx() { em }: MyContext
+    @Arg("text", () => String, { nullable: true }) text: string,
+    @Ctx() { em, req }: MyContext
   ): Promise<Post | null> {
-    // destructuring context
+    const userId = req.session.userId;
     const post = await em.findOne(Post, { id });
     if (!post) {
       return null;
     }
 
+    if (post.creatorId !== userId) {
+      throw new Error("not authorized");
+    }
+
     if (typeof title !== "undefined") {
       post.title = title;
-      await em.persistAndFlush(post);
     }
+
+    if (typeof text !== "undefined") {
+      post.text = text;
+    }
+    await em.persistAndFlush(post);
     return post;
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async deletePost(
     @Arg("id", () => Int) id: number,
-    @Ctx() { em }: MyContext // destructuring context
+    @Ctx() { em, req }: MyContext // destructuring context
   ) {
+    const userId = req.session.userId;
+    console.log("user", userId);
+
+    // delete will only happen if the creator of the post is the one deleting the post
     const post = await em.findOne(Post, { id });
     if (!post) {
       return false;
     }
-    await em.nativeDelete(Post, { id });
+    if (post.creatorId !== userId) {
+      throw new Error("not authorized");
+    }
+    const emFork = em.fork(false);
+    const connection = emFork.getConnection();
+    try {
+      await emFork.begin();
+      await connection.execute(
+        `
+      delete from upvote where post_id = ?;
+      delete from post where id = ?;
+    `,
+        [id, id]
+      );
+      await emFork.commit();
+    } catch (e) {
+      console.log(e.message);
+      await emFork.rollback();
+      throw e;
+    }
+
     return true;
   }
 }
