@@ -1,17 +1,15 @@
-import { Box, Flex, Heading, Link, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
+import EditDeletePostButtons from "../../components/EditDeletePostButtons";
 import Nav from "../../components/Nav";
 import Wrapper from "../../components/Wrapper";
-import {
-  useDeletePostMutation,
-  useGetPostQuery,
-} from "../../generated/graphql";
+import { useGetPostQuery, useMeQuery } from "../../generated/graphql";
 import { withApollo } from "../../withApollo";
 
 interface Props {}
 
-const Post = (props: Props): JSX.Element => {
+const Post = (): JSX.Element => {
   const router = useRouter();
   const postId =
     typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
@@ -24,6 +22,10 @@ const Post = (props: Props): JSX.Element => {
 
   if (loading) {
     return <Spinner />;
+  }
+
+  if (!data?.post) {
+    return <> </>;
   }
 
   return (
@@ -41,7 +43,15 @@ const Post = (props: Props): JSX.Element => {
           <Box fontStyle="italic" mb={4}>
             {data?.post?.creator.username}
           </Box>
-          <Box fontSize="lg">{data?.post?.text}</Box>
+          <Flex fontSize="lg">
+            <Text flex={1} mt={4} fontSize="lg">
+              {data?.post?.text}
+            </Text>
+            <EditDeletePostButtons
+              postId={postId}
+              creatorId={data.post.creatorId}
+            />
+          </Flex>
         </Flex>
       </Wrapper>
     </>

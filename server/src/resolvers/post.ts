@@ -219,34 +219,24 @@ export class PostResolver {
     @Arg("id", () => Int) id: number,
     @Ctx() { em, req }: MyContext // destructuring context
   ) {
+    const post = await em.findOne(Post, { id });
     const userId = req.session.userId;
-    console.log("user", userId);
+    const upvotes = await em.findOne(Upvote, { postId: id });
+    console.log("POST:", post);
+    console.log("UPVOTES:", upvotes);
 
     // delete will only happen if the creator of the post is the one deleting the post
-    const post = await em.findOne(Post, { id });
     if (!post) {
       return false;
     }
     if (post.creatorId !== userId) {
       throw new Error("not authorized");
     }
-    const emFork = em.fork(false);
-    const connection = emFork.getConnection();
-    try {
-      await emFork.begin();
-      await connection.execute(
-        `
-      delete from upvote where post_id = ?;
-      delete from post where id = ?;
-    `,
-        [id, id]
-      );
-      await emFork.commit();
-    } catch (e) {
-      console.log(e.message);
-      await emFork.rollback();
-      throw e;
+
+    if (upvotes) {
+      await em.removeAndFlush(upvotes);
     }
+    await em.removeAndFlush(post);
 
     return true;
   }

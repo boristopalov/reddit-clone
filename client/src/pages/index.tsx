@@ -7,19 +7,14 @@ import {
   Spinner,
   Stack,
   Text,
-  IconButton,
 } from "@chakra-ui/react";
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-import {
-  useDeletePostMutation,
-  useGetPostsQuery,
-  useMeQuery,
-} from "../generated/graphql";
+import { useGetPostsQuery, useMeQuery } from "../generated/graphql";
 import { withApollo } from "../withApollo";
 import UpvoteSection from "../components/UpvoteSection";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
+import EditDeletePostButtons from "../components/EditDeletePostButtons";
 
 const Index = (): JSX.Element => {
   const { data, loading, fetchMore, variables } = useGetPostsQuery({
@@ -38,8 +33,6 @@ const Index = (): JSX.Element => {
       },
     });
   };
-
-  const [deletePost, { error: deleteError }] = useDeletePostMutation();
 
   const { data: meData } = useMeQuery();
 
@@ -70,36 +63,10 @@ const Index = (): JSX.Element => {
                   <Text flex={1} mt={4} fontSize="sm">
                     {post.textSnippet}
                   </Text>
-                  {meData?.me?.id !== post.creator.id ? null : (
-                    <Box>
-                      <NextLink
-                        href="/post/edit/[id]"
-                        as={`/post/edit/${post.id}`}
-                      >
-                        <IconButton
-                          aria-label="Edit Post"
-                          icon={<EditIcon />}
-                          colorScheme="blackAlpha"
-                          mr={2}
-                        />
-                      </NextLink>
-                      <IconButton
-                        aria-label="Delete Post"
-                        icon={<DeleteIcon />}
-                        colorScheme="blackAlpha"
-                        onClick={async () => {
-                          await deletePost({
-                            variables: {
-                              id: post.id,
-                            },
-                            update: (cache) => {
-                              cache.evict({ id: "Post:" + post.id });
-                            },
-                          });
-                        }}
-                      />
-                    </Box>
-                  )}
+                  <EditDeletePostButtons
+                    postId={post.id}
+                    creatorId={post.creator.id}
+                  />
                 </Flex>
               </Box>
             </Flex>
