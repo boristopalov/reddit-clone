@@ -4,10 +4,8 @@ import React from "react";
 import EditDeletePostButtons from "../../components/EditDeletePostButtons";
 import Nav from "../../components/Nav";
 import Wrapper from "../../components/Wrapper";
-import { useGetPostQuery, useMeQuery } from "../../generated/graphql";
+import { useGetPostQuery } from "../../generated/graphql";
 import { withApollo } from "../../withApollo";
-
-interface Props {}
 
 const Post = (): JSX.Element => {
   const router = useRouter();

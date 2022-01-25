@@ -11,13 +11,13 @@ import {
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-import { useGetPostsQuery, useMeQuery } from "../generated/graphql";
+import { useGetPostsQuery } from "../generated/graphql";
 import { withApollo } from "../withApollo";
 import UpvoteSection from "../components/UpvoteSection";
 import EditDeletePostButtons from "../components/EditDeletePostButtons";
 
 const Index = (): JSX.Element => {
-  const { data, loading, fetchMore, variables } = useGetPostsQuery({
+  const { data, loading, fetchMore, variables, error } = useGetPostsQuery({
     variables: {
       limit: 20,
       cursor: null,
@@ -34,12 +34,10 @@ const Index = (): JSX.Element => {
     });
   };
 
-  const { data: meData } = useMeQuery();
-
   if (loading && !data) return <Spinner />;
 
-  if (!loading && !data) {
-    return <div> Query Failed </div>;
+  if (error) {
+    return <div> {error.message} </div>;
   }
 
   return (
