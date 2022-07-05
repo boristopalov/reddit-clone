@@ -1,5 +1,5 @@
-query getPosts($limit: Int!, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
+query getPosts($limit: Int!, $cursor: String, $subreddit: String) {
+  posts(limit: $limit, cursor: $cursor, subreddit: $subreddit) {
     hasMore
     posts {
       ...PostSnippet

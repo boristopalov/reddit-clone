@@ -51,6 +51,10 @@ export class Post {
 
   @Field()
   @Property()
+  subreddit!: string;
+
+  @Field()
+  @Property()
   createdAt: Date = new Date();
 
   @Field()

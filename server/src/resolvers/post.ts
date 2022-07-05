@@ -23,6 +23,9 @@ class PostInput {
 
   @Field()
   text: string;
+
+  @Field()
+  subreddit: string;
 }
 
 @ObjectType()
@@ -110,6 +113,8 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
+    @Arg("subreddit", () => String, { nullable: true })
+    subreddit: string | null,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
     @Ctx()
     context: MyContext
@@ -122,16 +127,18 @@ export class PostResolver {
     // i guess mikro-orm uses "?" as variables for native SQL queries
     // but since the params change and i can't
     // specify variables (ex. ?1, ?2) i need to dynamically change the order
-    let queryParams = cursor
-      ? [cursor, realLimit + 1]
-      : [realLimit + 1, cursor];
-
+    let queryParams =
+      cursor && subreddit
+        ? [subreddit, cursor, realLimit + 1]
+        : cursor
+        ? [cursor, realLimit + 1]
+        : [subreddit, realLimit + 1, cursor];
     if (user) {
       queryParams = [user, ...queryParams];
     }
 
     const res: Post[] = await connection.execute(
-      `select p.id, p.title, p.text, p,score, p.creator_id as "creatorId", p.created_at as "createdAt", p.updated_at as "updatedAt",
+      `select p.id, p.title, p.text, p,score, p.subreddit, p.creator_id as "creatorId", p.created_at as "createdAt", p.updated_at as "updatedAt",
       json_build_object(
         'id', u.id,
         'username', u.username,
@@ -145,7 +152,14 @@ export class PostResolver {
       from post p
       inner join public.user u 
       on p.creator_id = u.id
-    ${cursor ? `where p.created_at < ?` : ""} 
+      ${subreddit ? `where p.subreddit = ?` : ""}
+    ${
+      subreddit && cursor
+        ? "and p.created_at < ?"
+        : cursor
+        ? `where p.created_at < ?`
+        : ""
+    } 
     order by p.created_at DESC 
     limit ?`,
       queryParams

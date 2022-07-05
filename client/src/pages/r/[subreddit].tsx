@@ -1,36 +1,43 @@
 import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Link,
   Spinner,
   Stack,
+  Flex,
+  Box,
+  Heading,
+  Button,
+  Link,
   Text,
 } from "@chakra-ui/react";
-import Nav from "../components/Nav";
+import { NextPage } from "next";
 import NextLink from "next/link";
-import Wrapper from "../components/Wrapper";
-import { useGetPostsQuery } from "../generated/graphql";
-import { withApollo } from "../withApollo";
-import UpvoteSection from "../components/UpvoteSection";
-import EditDeletePostButtons from "../components/EditDeletePostButtons";
+import { useRouter } from "next/router";
+import React from "react";
+import EditDeletePostButtons from "../../components/EditDeletePostButtons";
+import Nav from "../../components/Nav";
+import UpvoteSection from "../../components/UpvoteSection";
+import Wrapper from "../../components/Wrapper";
+import { useGetPostsQuery } from "../../generated/graphql";
+import { withApollo } from "../../withApollo";
 
-const Index = (): JSX.Element => {
+const Subreddit: NextPage = () => {
+  const router = useRouter();
+  const subreddit =
+    typeof router.query.subreddit === "string" ? router.query.subreddit : null;
+
   const { data, loading, fetchMore, variables, error } = useGetPostsQuery({
     variables: {
       limit: 20,
       cursor: null,
-      subreddit: null,
+      subreddit: subreddit,
     },
     notifyOnNetworkStatusChange: true,
   });
-
   const fetchMorePosts = () => {
     fetchMore({
       variables: {
         limit: variables?.limit,
         cursor: data?.posts.posts[data.posts.posts.length - 1].createdAt,
+        subreddit: subreddit,
       },
     });
   };
@@ -93,4 +100,4 @@ const Index = (): JSX.Element => {
   );
 };
 
-export default withApollo({ ssr: true })(Index);
+export default withApollo({ ssr: true })(Subreddit);

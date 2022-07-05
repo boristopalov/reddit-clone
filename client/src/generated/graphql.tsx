@@ -94,6 +94,7 @@ export type Post = {
   creatorId: Scalars['Float'];
   id: Scalars['Int'];
   score: Scalars['Int'];
+  subreddit: Scalars['String'];
   text: Scalars['String'];
   textSnippet: Scalars['String'];
   title: Scalars['String'];
@@ -103,6 +104,7 @@ export type Post = {
 };
 
 export type PostInput = {
+  subreddit: Scalars['String'];
   text: Scalars['String'];
   title: Scalars['String'];
 };
@@ -125,6 +127,7 @@ export type QueryPostArgs = {
 export type QueryPostsArgs = {
   cursor?: InputMaybe<Scalars['String']>;
   limit: Scalars['Int'];
+  subreddit?: InputMaybe<Scalars['String']>;
 };
 
 export type Upvote = {
@@ -243,6 +246,7 @@ export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post',
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: InputMaybe<Scalars['String']>;
+  subreddit?: InputMaybe<Scalars['String']>;
 }>;
 
 
@@ -670,8 +674,8 @@ export type GetPostQueryHookResult = ReturnType<typeof useGetPostQuery>;
 export type GetPostLazyQueryHookResult = ReturnType<typeof useGetPostLazyQuery>;
 export type GetPostQueryResult = Apollo.QueryResult<GetPostQuery, GetPostQueryVariables>;
 export const GetPostsDocument = gql`
-    query getPosts($limit: Int!, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
+    query getPosts($limit: Int!, $cursor: String, $subreddit: String) {
+  posts(limit: $limit, cursor: $cursor, subreddit: $subreddit) {
     hasMore
     posts {
       ...PostSnippet
@@ -694,6 +698,7 @@ export const GetPostsDocument = gql`
  *   variables: {
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
+ *      subreddit: // value for 'subreddit'
  *   },
  * });
  */
