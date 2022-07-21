@@ -21,7 +21,7 @@ const createApolloClient = (ctx: NextPageContext | undefined) =>
               // any arguments (for the posts query in this case) that would result in an entirely different result being return
               // so here it would result in a different array of Posts, but since we don't want a new array based off
               // limit or cursor, we just set it to false
-              keyArgs: false,
+              keyArgs: ["subreddit"],
               merge(
                 existing: PaginatedPosts | undefined,
                 incoming: PaginatedPosts

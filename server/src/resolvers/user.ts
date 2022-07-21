@@ -56,7 +56,7 @@ export class UserResolver {
   async resetPassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { em, redis, req }: MyContext
+    @Ctx() { em: oldEm, redis, req }: MyContext
   ): Promise<UserResponse> {
     if (newPassword.length <= 3) {
       return {
@@ -82,7 +82,7 @@ export class UserResolver {
       };
     }
     await redis.del(key);
-
+    const em = oldEm.fork();
     const user = await em.findOne(User, { id: parseInt(userId) });
 
     if (!user) {
@@ -109,8 +109,9 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("usernameOrEmail") usernameOrEmail: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { em: oldEm, redis }: MyContext
   ) {
+    const em = oldEm.fork();
     const user = await em.findOne(
       User,
       usernameOrEmail.includes("@")
@@ -137,11 +138,12 @@ export class UserResolver {
     return true;
   }
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext) {
+  async me(@Ctx() { em: oldEm, req }: MyContext) {
     // not logged in
     if (!req.session.userId) {
       return null;
     }
+    const em = oldEm.fork();
     // if the user has a cookie they are logged in
     const user = await em.findOne(User, { id: req.session.userId });
     return user;
@@ -150,8 +152,9 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async registerUser(
     @Arg("input", () => UsernamePasswordInput) input: UsernamePasswordInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { em: oldEm, req }: MyContext
   ): Promise<UserResponse> {
+    const em = oldEm.fork();
     const errors = await validateRegister(input);
     if (errors) {
       return { errors };
@@ -192,8 +195,9 @@ export class UserResolver {
   async loginUser(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { em: oldEm, req }: MyContext
   ): Promise<UserResponse> {
+    const em = oldEm.fork();
     const user = await em.findOne(
       User,
       usernameOrEmail.includes("@")
@@ -231,7 +235,8 @@ export class UserResolver {
   }
 
   @Query(() => [User])
-  getUsers(@Ctx() { em }: MyContext) {
+  getUsers(@Ctx() { em: oldEm }: MyContext) {
+    const em = oldEm.fork();
     return em.find(User, {});
   }
 

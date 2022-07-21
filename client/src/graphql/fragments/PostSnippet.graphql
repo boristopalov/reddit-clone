@@ -6,6 +6,7 @@ fragment PostSnippet on Post {
   createdAt
   updatedAt
   voteStatus
+  subreddit
   creator {
     id
     username

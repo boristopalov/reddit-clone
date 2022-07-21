@@ -12,17 +12,21 @@ import { NextPage } from "next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
-import EditDeletePostButtons from "../../components/EditDeletePostButtons";
-import Nav from "../../components/Nav";
-import UpvoteSection from "../../components/UpvoteSection";
-import Wrapper from "../../components/Wrapper";
-import { useGetPostsQuery } from "../../generated/graphql";
-import { withApollo } from "../../withApollo";
+import EditDeletePostButtons from "../../../components/EditDeletePostButtons";
+import Nav from "../../../components/Nav";
+import UpvoteSection from "../../../components/UpvoteSection";
+import Wrapper from "../../../components/Wrapper";
+import { useGetPostsQuery, useMeQuery } from "../../../generated/graphql";
+import { withApollo } from "../../../withApollo";
 
 const Subreddit: NextPage = () => {
   const router = useRouter();
+
   const subreddit =
     typeof router.query.subreddit === "string" ? router.query.subreddit : null;
+
+  const { data: meData } = useMeQuery();
+  const currentUser = meData?.me?.id || null;
 
   const { data, loading, fetchMore, variables, error } = useGetPostsQuery({
     variables: {
@@ -30,7 +34,6 @@ const Subreddit: NextPage = () => {
       cursor: null,
       subreddit: subreddit,
     },
-    notifyOnNetworkStatusChange: true,
   });
   const fetchMorePosts = () => {
     fetchMore({
@@ -55,12 +58,18 @@ const Subreddit: NextPage = () => {
         <Stack spacing={8}>
           {data!.posts.posts.map((post) => (
             <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
-              <UpvoteSection post={post} />
+              <UpvoteSection post={post} currentUser={currentUser} />
               <Box flex={1}>
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                <NextLink
+                  href="/r/[subreddit]/post/[id]"
+                  as={`/r/${subreddit}/post/${post.id}`}
+                >
                   <Link>
                     <Heading fontSize="2xl">{post.title}</Heading>
                   </Link>
+                </NextLink>
+                <NextLink href="/r/[subreddit]" as={`/r/${post.subreddit}`}>
+                  <Link>r/{post.subreddit}</Link>
                 </NextLink>
                 <Text fontSize="md" fontStyle="italic">
                   Posted by {post.creator.username}
@@ -72,6 +81,8 @@ const Subreddit: NextPage = () => {
                   <EditDeletePostButtons
                     postId={post.id}
                     creatorId={post.creator.id}
+                    subreddit={post.subreddit}
+                    currentUser={currentUser}
                   />
                 </Flex>
               </Box>
@@ -100,4 +111,4 @@ const Subreddit: NextPage = () => {
   );
 };
 
-export default withApollo({ ssr: true })(Subreddit);
+export default withApollo({ ssr: true })(Subreddit) as any;

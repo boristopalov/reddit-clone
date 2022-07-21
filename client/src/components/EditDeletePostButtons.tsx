@@ -7,20 +7,29 @@ import { useRouter } from "next/router";
 
 interface Props {
   postId: number;
+  subreddit: string;
   creatorId: number;
+  currentUser: number | null;
 }
 
-const EditDeletePostButtons = ({ postId, creatorId }: Props): JSX.Element => {
+const EditDeletePostButtons = ({
+  postId,
+  creatorId,
+  subreddit,
+  currentUser,
+}: Props): JSX.Element => {
   const [deletePost] = useDeletePostMutation();
-  const { data } = useMeQuery();
   const router = useRouter();
 
-  if (data?.me?.id !== creatorId) {
+  if (currentUser !== creatorId) {
     return <> </>;
   }
   return (
     <Box>
-      <NextLink href="/post/edit/[id]" as={`/post/edit/${postId}`}>
+      <NextLink
+        href="/r/[subreddit]/edit/[id]"
+        as={`/r/${subreddit}/edit/${postId}`}
+      >
         <IconButton
           aria-label="Edit Post"
           icon={<EditIcon />}

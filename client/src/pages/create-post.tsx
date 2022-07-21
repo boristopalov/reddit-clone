@@ -17,11 +17,15 @@ const CreatePost = (): JSX.Element => {
       <Nav />
       <Wrapper variant="small">
         <Formik
-          initialValues={{ title: "", text: "" }}
+          initialValues={{ title: "", subreddit: "", text: "" }}
           onSubmit={async (values) => {
             const { errors } = await createPost({
               variables: {
-                input: { text: values.text, title: values.title },
+                input: {
+                  text: values.text,
+                  subreddit: values.subreddit,
+                  title: values.title,
+                },
               },
               update: (cache) => {
                 cache.evict({ fieldName: "posts" });
@@ -37,6 +41,13 @@ const CreatePost = (): JSX.Element => {
           {({ isSubmitting }) => (
             <Form>
               <InputField name="title" label="Title" placeholder="Post Title" />
+              <Box mt={4}>
+                <InputField
+                  name="subreddit"
+                  label="Subreddit"
+                  placeholder="Subreddit"
+                />
+              </Box>
               <Box mt={4}>
                 <InputField
                   name="text"

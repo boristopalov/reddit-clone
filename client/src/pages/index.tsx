@@ -11,7 +11,7 @@ import {
 import Nav from "../components/Nav";
 import NextLink from "next/link";
 import Wrapper from "../components/Wrapper";
-import { useGetPostsQuery } from "../generated/graphql";
+import { useGetPostsQuery, useMeQuery } from "../generated/graphql";
 import { withApollo } from "../withApollo";
 import UpvoteSection from "../components/UpvoteSection";
 import EditDeletePostButtons from "../components/EditDeletePostButtons";
@@ -25,6 +25,8 @@ const Index = (): JSX.Element => {
     },
     notifyOnNetworkStatusChange: true,
   });
+  const { data: meData } = useMeQuery();
+  const currentUser = meData?.me?.id || null;
 
   const fetchMorePosts = () => {
     fetchMore({
@@ -48,16 +50,24 @@ const Index = (): JSX.Element => {
         <Stack spacing={8}>
           {data!.posts.posts.map((post) => (
             <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
-              <UpvoteSection post={post} />
+              <UpvoteSection post={post} currentUser={currentUser} />
               <Box flex={1}>
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                <NextLink
+                  href="/r/[subreddit]/post/[id]"
+                  as={`/r/${post.subreddit}/post/${post.id}`}
+                >
                   <Link>
                     <Heading fontSize="2xl">{post.title}</Heading>
                   </Link>
                 </NextLink>
+
+                <NextLink href="/r/[subreddit]" as={`/r/${post.subreddit}`}>
+                  <Link>r/{post.subreddit}</Link>
+                </NextLink>
                 <Text fontSize="md" fontStyle="italic">
                   Posted by {post.creator.username}
                 </Text>
+                <Text fontSize="md" fontStyle="italic"></Text>
                 <Flex>
                   <Text flex={1} mt={4} fontSize="sm">
                     {post.textSnippet}
@@ -65,6 +75,8 @@ const Index = (): JSX.Element => {
                   <EditDeletePostButtons
                     postId={post.id}
                     creatorId={post.creator.id}
+                    subreddit={post.subreddit}
+                    currentUser={currentUser}
                   />
                 </Flex>
               </Box>

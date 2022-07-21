@@ -1,0 +1,64 @@
+fragment comment on Comment {
+  text
+  id
+  parentId
+  score
+  updatedAt
+  voteStatus
+  userId
+  deleted
+  postId
+  user {
+    id
+    username
+  }
+}
+
+fragment recursiveComment on Comment {
+  ...comment
+  children {
+    ...comment
+    children {
+      ...comment
+      children {
+        ...comment
+        children {
+          ...comment
+          children {
+            ...comment
+            children {
+              ...comment
+              children {
+                ...comment
+                children {
+                  ...comment
+                  children {
+                    ...comment
+                    children {
+                      ...comment
+                      children {
+                        ...comment
+                        children {
+                          ...comment
+                          children {
+                            ...comment
+                            children {
+                              ...comment
+                              children {
+                                ...comment
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

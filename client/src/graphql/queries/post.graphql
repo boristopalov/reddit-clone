@@ -8,6 +8,7 @@ query getPost($id: Int!) {
     updatedAt
     voteStatus
     creatorId
+    subreddit
     creator {
       id
       username

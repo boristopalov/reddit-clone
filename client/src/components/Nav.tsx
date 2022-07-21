@@ -85,7 +85,7 @@ const Nav: React.FC<Props> = () => {
     <Flex background="gray" position="sticky" zIndex={1} top={0} padding={4}>
       <NextLink href="/">
         <Link>
-          <Heading pl={4}> Raddit </Heading>
+          <Heading pl={4}> NotReddit </Heading>
         </Link>
       </NextLink>
       <Flex ml="auto" alignItems="center" pr={4}>

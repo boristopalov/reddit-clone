@@ -1,0 +1,5 @@
+query getComments($postId: Int!) {
+  comments(postId: $postId) {
+    ...recursiveComment
+  }
+}

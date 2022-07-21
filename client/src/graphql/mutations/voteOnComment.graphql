@@ -1,0 +1,3 @@
+mutation VoteOnComment($value: Int!, $commentId: Int!) {
+  voteOnComment(value: $value, commentId: $commentId)
+}

@@ -4,6 +4,8 @@ import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
 import { Upvote } from "./entities/Upvote";
 import { User } from "./entities/User";
+import { Comment } from "./entities/Comment";
+import { CommentUpvote } from "./entities/CommentUpvote";
 require("dotenv").config();
 
 const config: Options = {
@@ -19,7 +21,7 @@ const config: Options = {
     safe: false, // allow to disable table and column dropping
     emit: "ts", // migration generation mode
   },
-  entities: [Post, User, Upvote],
+  entities: [Post, User, Upvote, Comment, CommentUpvote],
   dbName: "reddit",
   user: process.env.DB_USER,
   password: process.env.DB_PASS,

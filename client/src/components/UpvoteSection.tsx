@@ -10,6 +10,7 @@ import {
 
 interface Props {
   post: PostSnippetFragment;
+  currentUser: number | null;
 }
 
 const updateAfterVote = (
@@ -49,9 +50,13 @@ const updateAfterVote = (
   }
 };
 
-const UpvoteSection = ({ post }: Props): JSX.Element => {
+const UpvoteSection = ({ post, currentUser }: Props): JSX.Element => {
   const [postScore, setPostScore] = useState(post.score);
   const [vote] = useVoteMutation();
+
+  if (!currentUser) {
+    return <></>;
+  }
 
   return (
     <Flex

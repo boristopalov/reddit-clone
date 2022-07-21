@@ -6,6 +6,8 @@ import {
   Property,
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
+import { Comment } from "./Comment";
+import { CommentUpvote } from "./CommentUpvote";
 import { Post } from "./Post";
 import { Upvote } from "./Upvote";
 
@@ -35,6 +37,16 @@ export class User {
   @Field(() => [Upvote], { nullable: true })
   @OneToMany(() => Upvote, (upvote: Upvote) => upvote.user)
   upvotes: Collection<Upvote> = new Collection<Upvote>(this);
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment: Comment) => comment.user)
+  comments: Collection<Comment> = new Collection<Comment>(this);
+
+  @Field(() => [CommentUpvote], { nullable: true })
+  @OneToMany(() => CommentUpvote, (upvote: CommentUpvote) => upvote.user)
+  commentUpvotes: Collection<CommentUpvote> = new Collection<CommentUpvote>(
+    this
+  );
 
   @Field()
   @Property()

@@ -2,15 +2,15 @@ import { Box, Flex, Button, Spinner } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
-import InputField from "../../../components/InputField";
-import Nav from "../../../components/Nav";
-import Wrapper from "../../../components/Wrapper";
+import InputField from "../../../../components/InputField";
+import Nav from "../../../../components/Nav";
+import Wrapper from "../../../../components/Wrapper";
 import {
   useGetPostQuery,
   useUpdatePostMutation,
-} from "../../../generated/graphql";
-import { useIsAuth } from "../../../utils/useIsAuth";
-import { withApollo } from "../../../withApollo";
+} from "../../../../generated/graphql";
+import { useIsAuth } from "../../../../utils/useIsAuth";
+import { withApollo } from "../../../../withApollo";
 
 const EditPost = (): JSX.Element => {
   useIsAuth();

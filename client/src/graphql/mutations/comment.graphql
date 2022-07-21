@@ -1,0 +1,3 @@
+mutation comment($text: String!, $postId: Int!, $parentId: Int) {
+  comment(text: $text, postId: $postId, parentId: $parentId)
+}

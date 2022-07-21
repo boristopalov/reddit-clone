@@ -8,6 +8,7 @@ import {
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType, Root } from "type-graphql";
 import { Upvote } from "./Upvote";
+import { Comment } from "./Comment";
 import { User } from "./User";
 
 @ObjectType()
@@ -37,6 +38,10 @@ export class Post {
   @Field(() => [Upvote], { nullable: true })
   @OneToMany(() => Upvote, (upvote: Upvote) => upvote.post)
   upvotes: Collection<Upvote> = new Collection<Upvote>(this);
+
+  @Field(() => [Comment], { nullable: true })
+  @OneToMany(() => Comment, (comment: Comment) => comment.post)
+  comments: Collection<Comment> = new Collection<Comment>(this);
 
   @Field(() => Int, { nullable: true })
   voteStatus: number | null; // 1 if user has previously upvoted, -1 if user has previously downvoted, otehrwise null
